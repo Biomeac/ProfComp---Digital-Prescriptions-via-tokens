@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+ENV/
+.DS_Store
+flaskr/instance/*.db
+flaskr/instance/*.sqlite
+flaskr/instance/*.sqlite3
+.vscode/
+.idea/

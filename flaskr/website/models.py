@@ -22,12 +22,18 @@ class Patient(db.Model):
     __tablename__ = 'patients'
     
     id = db.Column(db.Integer, primary_key=True)
+<<<<<<< HEAD
     # medicare Integer
     medicare = db.Column(db.BigInteger)  # Contract specifies int
+=======
+    medicare = db.Column(db.String(11))
+    medicare_issue = db.Column(db.Integer, nullable=True)  # individual reference number
+>>>>>>> 289f9f3 (Add Scenario/User/Attempt models and extend Patient per data contract)
     pharmaceut_ben_entitlement_no = db.Column(db.String(20))
     sfty_net_entitlement_cardholder = db.Column(db.Boolean, default=False)
     rpbs_ben_entitlement_cardholder = db.Column(db.Boolean, default=False)
     name = db.Column(db.String(100))
+<<<<<<< HEAD
     dob = db.Column(db.String(10))  # DD/MM/YYYY format
     preferred_contact = db.Column(db.BigInteger)
     address_1 = db.Column(db.String(100))
@@ -42,6 +48,56 @@ class Patient(db.Model):
 
     is_registered = db.Column(db.Boolean, default=True)
 
+=======
+    dob = db.Column(db.String(10))  # format is DD/MM/YYYY
+    preferred_contact = db.Column(db.String(20))
+    address_1 = db.Column(db.String(100))
+    address_2 = db.Column(db.String(100))
+    script_date = db.Column(db.String(10))
+    pbs = db.Column(db.String(50), nullable=True) # set pbs and rpbs (for now their value are 'none')
+    rpbs = db.Column(db.String(50), nullable=True)
+    # Extended patient profile (for edit-pt and registration flows)
+    last_name = db.Column(db.String(100), nullable=True)
+    given_name = db.Column(db.String(100), nullable=True)
+    title = db.Column(db.String(50), nullable=True)
+    sex = db.Column(db.String(20), nullable=True)  # Male/Female
+    pt_number = db.Column(db.String(50), nullable=True)
+    suburb = db.Column(db.String(100), nullable=True)
+    state = db.Column(db.String(10), nullable=True)  # act, nt, nsw, qld, sa, tas, vic, wa
+    postcode = db.Column(db.Integer, nullable=True)
+    phone = db.Column(db.String(30), nullable=True)
+    mobile = db.Column(db.String(30), nullable=True)
+    licence = db.Column(db.String(50), nullable=True)
+    sms_repeats = db.Column(db.Boolean, default=False)
+    sms_owing = db.Column(db.Boolean, default=False)
+    email = db.Column(db.String(120), nullable=True)
+    medicare_valid_to = db.Column(db.String(10), nullable=True)  # mm/yyyy
+    medicare_surname = db.Column(db.String(100), nullable=True)
+    medicare_given_name = db.Column(db.String(100), nullable=True)
+    concession_number = db.Column(db.String(50), nullable=True)
+    concession_valid_to = db.Column(db.String(10), nullable=True)
+    safety_net_number = db.Column(db.String(50), nullable=True)
+    repatriation_number = db.Column(db.String(50), nullable=True)
+    repatriation_valid_to = db.Column(db.String(10), nullable=True)
+    repatriation_type = db.Column(db.String(50), nullable=True)
+    ndss_number = db.Column(db.String(50), nullable=True)
+    ihi_number = db.Column(db.String(16), nullable=True)
+    ihi_status = db.Column(db.String(50), nullable=True)
+    ihi_record_status = db.Column(db.String(50), nullable=True)
+    doctor = db.Column(db.String(100), nullable=True)  # could be ID reference later
+    ctg_registered = db.Column(db.Boolean, default=False)
+    generics_only = db.Column(db.Boolean, default=False)
+    repeats_held = db.Column(db.Boolean, default=False)
+    pt_deceased = db.Column(db.Boolean, default=False)
+    carer = db.Column(db.JSON, nullable=True)
+    consented_to_asl = db.Column(db.Boolean, default=False)
+    consented_to_upload = db.Column(db.Boolean, default=False)
+    
+    # Combined status=
+    asl_status = db.Column(db.Integer, default=ASLStatus.GRANTED.value)
+    consent_last_updated = db.Column(db.String(20), default=lambda: datetime.utcnow().strftime('%d/%m/%Y %H:%M'))
+    
+>>>>>>> 289f9f3 (Add Scenario/User/Attempt models and extend Patient per data contract)
     def get_asl_status(self):
         return ASLStatus(self.asl_status)
     
@@ -58,10 +114,17 @@ class Prescriber(db.Model):
     title = db.Column(db.String(100))
     address_1 = db.Column(db.String(100))
     address_2 = db.Column(db.String(100))
+<<<<<<< HEAD
     prescriber_id = db.Column(db.Integer)  # int
     hpii = db.Column(db.BigInteger)  # int
     hpio = db.Column(db.BigInteger)  # int
     phone = db.Column(db.String(20))  # str
+=======
+    prescriber_id = db.Column(db.String(10))
+    hpii = db.Column(db.String(16)) # HPI-individual
+    hpio = db.Column(db.String(16)) #HPI - organisation
+    phone = db.Column(db.String(20))
+>>>>>>> 289f9f3 (Add Scenario/User/Attempt models and extend Patient per data contract)
     fax = db.Column(db.String(20), nullable=True)
 
 class Prescription(db.Model):
@@ -94,4 +157,67 @@ class Prescription(db.Model):
     prescriber = db.relationship('Prescriber', backref='prescriptions')
     
     def get_status(self):
+<<<<<<< HEAD
         return PrescriptionStatus(self.status)
+=======
+        return PrescriptionStatus(self.status)
+
+# -----------------------------------------------------------------------------
+# Scenario/Attempt models for dashboard and workflows
+# -----------------------------------------------------------------------------
+
+class UserRole(Enum):
+    STUDENT = 0
+    TEACHER = 1
+
+
+class User(db.Model):
+    __tablename__ = 'users'
+
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(120), unique=True, nullable=True)
+    name = db.Column(db.String(100), nullable=True)
+    role = db.Column(db.Integer, default=UserRole.STUDENT.value)
+
+    def get_role(self):
+        return UserRole(self.role)
+
+
+# Many-to-many: which users can edit a scenario
+scenario_edit_access = db.Table(
+    'scenario_edit_access',
+    db.Column('scenario_id', db.Integer, db.ForeignKey('scenarios.id'), primary_key=True),
+    db.Column('user_id', db.Integer, db.ForeignKey('users.id'), primary_key=True)
+)
+
+
+class Scenario(db.Model):
+    __tablename__ = 'scenarios'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(200), nullable=False)
+    instructions = db.Column(db.Text, nullable=True)
+    num_students = db.Column(db.Integer, default=0)
+    num_students_completed = db.Column(db.Integer, default=0)
+    creation_date = db.Column(db.DateTime, default=datetime.utcnow)
+    due_date = db.Column(db.DateTime, nullable=True)
+    # time_limit in seconds; front end can render as human-readable (e.g., 1 hour)
+    time_limit_seconds = db.Column(db.Integer, nullable=True)
+
+    # Who can edit this scenario
+    edit_access = db.relationship('User', secondary=scenario_edit_access, backref='editable_scenarios')
+
+
+class ScenarioAttempt(db.Model):
+    __tablename__ = 'scenario_attempts'
+
+    id = db.Column(db.Integer, primary_key=True)
+    scenario_id = db.Column(db.Integer, db.ForeignKey('scenarios.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    attempt_number = db.Column(db.Integer, default=1)  # monotonically increasing per user/scenario
+    submission_time = db.Column(db.DateTime, nullable=True)
+    datapoints = db.Column(db.JSON, nullable=True)  # flexible payload, per client requirements
+
+    scenario = db.relationship('Scenario', backref='attempts')
+    user = db.relationship('User', backref='attempts')
+>>>>>>> 289f9f3 (Add Scenario/User/Attempt models and extend Patient per data contract)
