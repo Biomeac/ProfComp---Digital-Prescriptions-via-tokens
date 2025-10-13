@@ -4,7 +4,7 @@ Flask-Login==0.6.2
 Flask-WTF==1.1.1
 Werkzeug==2.3.7
 WTForms==3.0.1
-SQLAlchemy==2.0.20
+SQLAlchemy==2.0.36
 markdown-it-py==4.0.0
 Flask-Minify==0.50
 pyzipper==0.3.6
@@ -20,4 +20,7 @@ gunicorn==21.2.0
 email-validator==2.1.0
 requests==2.31.0
 Flask-Migrate==4.1.0
+
+# Ensure Alembic compatible with Python 3.13 / SQLAlchemy 2.0.36
+alembic==1.13.3
 
