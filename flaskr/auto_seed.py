@@ -34,7 +34,7 @@ def auto_seed():
         # Always seed users
         print("Seeding users...")
         from init_users import init_users
-        init_users(auto_mode=True)
+        init_users()
         
         # Verify users were created
         user_count = User.query.count()
